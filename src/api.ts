@@ -43,7 +43,7 @@ export const api = new Elysia({ prefix: "api" })
       200: t.Array(t.Object({
         userid: t.String(),
         nome: t.String(),
-        notaid: t.Integer(),
+        notaid: t.String(),
         titolonota: t.String(),
         updated_at: t.Date()
       })),
@@ -58,3 +58,5 @@ export const api = new Elysia({ prefix: "api" })
       description: "Restituisce l'elenco delle note collegate all'utente autenticato."
     }
   })
+
+export type Api = typeof api
