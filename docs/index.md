@@ -30,7 +30,7 @@ Nella mia API sarà sufficiente costruire una route `GET` e fare una chiamata a 
 
 Questa rotta fa una chiamata alla vista citata prima tramite un SELECT di tutti gli attributi delle tuple che hanno come userId quello corrispondente all'utente loggato
 ```sql
-SELECT * FROM note_utente WHERE userid = $1
+SELECT * FROM note_utente WHERE userid = "userId"
 ```
 Chiaramente per ottenere informazioni sull'utente loggato, siccome sto usando better-auth ho deciso di usare direttamente la loro api, passando direttamente gli headers dove (se presente) c'è il cookie con tutte le info sull'utente.
 
@@ -38,4 +38,44 @@ Chiaramente per ottenere informazioni sull'utente loggato, siccome sto usando be
 const session = await auth.api.getSession({
   headers: request.headers
 })
+```
+---
+### Anteprima della dashboard per capire quali query aggiungere
+![alt text](image.png)
+
+Come si può vedere dall'immagine dobbiamo aggiungere sulla relazione note degli attributi necessari, come `preferito` e `archiviato` e successivamente riportare queste informazioni sulla view `note_utente`
+
+```sql
+ALTER TABLE note
+ADD COLUMN preferito BOOLEAN NOT NULL DEFAULT false;
+ADD COLUMN archiviato BOOLEAN NOT NULL DEFAULT false;
+```
+
+E in modo analogo pure sulla view 
+
+### A questo punto
+
+Ho creato una API route **GET /api/nota/:id** che non fa altro che fare un select dove però prende solo il la tupla che ha come id (che è primary key, per garantire l'unicità) l'id messo come parametro al momento della richiesta.
+
+```sql
+SELECT *
+FROM note
+WHERE author = "userId" AND id = "id"
+ORDER BY updated_at DESC 
+```
+
+Inoltre mi serve una API route **GET /api/note/preferite** che ritorna unicamente le note con il valore true all'attributo preferito, ovvero:
+
+```sql
+SELECT *
+FROM note_utente
+WHERE userid = "userId" AND preferito = true
+```
+
+Una query analoga per la route **GET /api/note/archiviate** che ritorna unicamente le note archiviate, quindi con valore true all'attributo archiviato:
+
+```sql
+SELECT *
+FROM note_utente
+WHERE userid = "userId" AND archiviato = true
 ```
