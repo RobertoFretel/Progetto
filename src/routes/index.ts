@@ -5,6 +5,7 @@ import Layout, { loaderApp } from "./dashboard/Layout"
 import Login, { actionLogin } from "./Login"
 import Register, { actionSignup } from "./Register"
 import Home, { loaderHome } from "./dashboard/Home";
+import Note, { loaderNote } from "./dashboard/Note";
 
 export const routes: RouteObject[] = [
   {
@@ -14,6 +15,11 @@ export const routes: RouteObject[] = [
     children: [
       {
         index: true, Component: Home, loader: loaderHome
+      },
+      {
+        path: ':notaId',
+        Component: Note,
+        loader: loaderNote
       }
     ]
   },

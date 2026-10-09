@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiClient, authClient } from "@/lib/client";
-import { redirect, useLoaderData, Outlet } from "react-router";
+import { Link, redirect, useLoaderData } from "react-router";
 
 import { formatDate } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card"
 
 import { ChevronRight, FileText, Tag, Hash, Heart } from "lucide-react";
 import type { User } from "better-auth";
+import { cn } from "@/lib/utils";
 
 export const loaderHome = async () => {
   const res = await apiClient.api.note.get()
@@ -105,7 +106,7 @@ export default function Home () {
                 <span className="font-medium">{formatDate(currentNote.updated_at)}</span>
               </div>
             </div>
-            <Button variant="outline" className="w-full">Apri nota <ChevronRight data-icon="inline-end" /></Button>
+            <Link to={`/dashboard/${currentNote.notaid}`} className={cn(buttonVariants({ variant: "outline" }), "w-full")}>Apri nota <ChevronRight data-icon="inline-end" /></Link>
           </CardContent>
         </Card>
       )}

@@ -21,6 +21,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { Link, redirect } from 'react-router'
 import type { User } from 'better-auth'
 
 
@@ -50,7 +51,7 @@ export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton isActive tooltip="Tutte le note">
+                <SidebarMenuButton onClick={() => redirect("/dashboard")} isActive tooltip="Tutte le note">
                   <Inbox aria-hidden="true" />
                   <span>Tutte le note</span>
                   <Badge variant="secondary" className="ml-auto group-data-[collapsible=icon]:hidden">{notes.length}</Badge>
@@ -79,7 +80,7 @@ export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
                 <SidebarMenuItem key={note.notaid}>
                   <SidebarMenuButton>
                     <FileText aria-hidden="true" />
-                    <span className="truncate">{note.titolonota}</span>
+                    <Link to={`/dashboard/${note.notaid}`} className="truncate">{note.titolonota}</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
