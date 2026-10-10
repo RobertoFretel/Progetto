@@ -16,7 +16,7 @@ const router = createBrowserRouter(routes)
 
 const app = (
   <StrictMode>
-    <ThemeProvider defaultTheme="system">
+    <ThemeProvider defaultTheme="dark">
       <RouterProvider router={router} />
     </ThemeProvider>
   </StrictMode>

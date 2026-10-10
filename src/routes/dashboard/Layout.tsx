@@ -8,8 +8,9 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Moon, Plus, Sun } from "lucide-react";
 import type { User } from "better-auth";
+import { useTheme } from "@/components/ThemeProvider";
 
 export const loaderApp = async () => {
   const res = await apiClient.api.note.get()
@@ -23,6 +24,7 @@ export const loaderApp = async () => {
 export function App() {
   const { data } = useLoaderData() as Awaited<ReturnType<typeof loaderApp>>
   const [user, setUser] = useState<User>()
+  const { toggleTheme, theme } = useTheme()
 
   useEffect(() => {
 
@@ -48,6 +50,9 @@ export function App() {
               Le mie note
             </Link>
           </div>
+          <Button variant={"ghost"} size={"icon"} onClick={toggleTheme}>
+            {theme == "dark" ? <Moon></Moon> : <Sun></Sun>}
+          </Button>
           <Button size="sm" className="gap-2">
             <Plus aria-hidden="true" />
             <span className="hidden sm:inline">Nuova nota</span>

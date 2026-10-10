@@ -1,39 +1,6 @@
 @import "../styles/globals.css";
-
-/* Integrazione del tema highlight.js con il blocco codice */
-.prose pre {
-  background-color: var(--code);
-  color: var(--code-foreground);
-  border-radius: var(--radius);
+@import "katex/dist/katex.min.css";
+@import "highlight.js/styles/github.css";
+.dark {
+  @import "highlight.js/styles/github-dark.css";
 }
-.prose pre code.hljs {
-  background: transparent;
-  padding: 0;
-}
-.prose :not(pre) > code {
-  background-color: var(--muted);
-  color: var(--primary);
-  padding: 0.15em 0.4em;
-  border-radius: 0.35rem;
-  font-weight: 500;
-}
-.prose :not(pre) > code::before,
-.prose :not(pre) > code::after {
-  content: none;
-}
-.prose blockquote p::before,
-.prose blockquote p::after {
-  content: none;
-}
-
-.prose blockquote p {
-  color: var(--color-muted-foreground);
-  font-style: italic;
-}
-
-.prose .katex-display {
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-block: 0.25rem;
-}
-

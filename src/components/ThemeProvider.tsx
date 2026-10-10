@@ -64,9 +64,14 @@ export function ThemeProvider({
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext)
+  const toggleTheme = () => {
+    context.setTheme(context.theme == "dark" ? "light" : "dark")
+  }
 
   if (context === undefined)
     throw new Error("useTheme must be used within a ThemeProvider")
 
-  return context
+  return {
+    toggleTheme, theme: context.theme
+  }
 }
