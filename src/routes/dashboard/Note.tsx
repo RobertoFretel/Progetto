@@ -1,8 +1,9 @@
-import { redirect, useLoaderData, type LoaderFunctionArgs } from "react-router"
+import { Form, redirect, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router"
 import { apiClient } from "@/lib/client"
 import { MarkdownContent } from '@/components/markdown-content'
 import { Archive, Star } from 'lucide-react'
-import { useId, useMemo, useState } from "react"
+import { useEffect, useId, useMemo, useState } from "react"
+import { Button } from "@/components/ui/button"
 
 export async function loaderNote({ params }: LoaderFunctionArgs ) {
   const id = params["notaId"] as string
@@ -13,6 +14,22 @@ export async function loaderNote({ params }: LoaderFunctionArgs ) {
   }
 
   return res
+}
+
+export async function actionNote({ params, request }: ActionFunctionArgs) {
+  const id = params["notaId"] as string
+  const formData = await request.formData()
+  const contenuto = formData.get("contenuto") as string || ""
+
+  if (contenuto != "") {
+    const res = await apiClient.api.nota({ id }).patch({ contenuto })
+    if (res.status == 200) {
+      return true
+    } else {
+      return false
+    }
+  }
+  
 }
 
 const dateFormatter = new Intl.DateTimeFormat('it-IT', {
@@ -31,6 +48,10 @@ export default function Note() {
   const [contenuto, setContent] = useState(data ? data.contenuto : "")
   const textAreaId = useId()
 
+  useEffect(() => {
+    setEditing(false)
+  }, [data])
+
   if (data == null) return
   return (
     <article className="overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm">
@@ -38,7 +59,7 @@ export default function Note() {
         <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
           <span>{`#${data.id}`}</span>
           <span aria-hidden="true">{'·'}</span>
-          <time dateTime={data.created_at.toISOString()}>{formatDate(data.created_at)}</time>
+          <time dateTime={data.updated_at.toISOString()}>{formatDate(data.updated_at)}</time>
         </div>
 
         <div className="flex items-start justify-between gap-4">
@@ -66,27 +87,34 @@ export default function Note() {
         )}
       </header>
 
-      {editing == false ? (
-        <div className="px-6 py-8 md:px-10" onDoubleClick={() => setEditing(v => !v)}>
-          <MarkdownContent content={contenuto} />
-        </div>
-      ) : (
-        <div className="px-6 py-8 md:px-10" onDoubleClick={() => setEditing(v => !v)}>
-          <textarea
-            id={textAreaId}
-            value={contenuto}
-            onChange={(event) => setContent(event.target.value)}
-            autoFocus
-            spellCheck={false}
-            className="field-sizing-content min-h-64 w-full resize-y rounded-lg border bg-muted/40 p-4 font-mono text-sm leading-relaxed text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
-          />
-        </div>        
-      )}
+      <Form method="post" className="relative">
+        {editing == false ? (
+          <div className="px-6 py-8 md:px-10" onDoubleClick={() => setEditing(v => !v)}>
+            <MarkdownContent content={data.contenuto} />
+          </div>
+        ) : (
+          <div className="px-6 py-8 md:px-10" onDoubleClick={() => setEditing(v => !v)}>
+            <textarea
+              name="contenuto"
+              id={textAreaId}
+              defaultValue={data.contenuto}
+              onChange={(event) => setContent(event.target.value)}
+              autoFocus
+              spellCheck={false}
+              className="field-sizing-content min-h-64 w-full resize-y rounded-lg border bg-muted/40 p-4 font-mono text-sm leading-relaxed text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
+            />
+            <Button variant="secondary" size={"sm"} type="submit" className="absolute right-16 top-12">SALVA</Button>
+          </div>
+        )}
+      </Form>
 
       <footer className="flex flex-wrap items-center gap-2 border-t bg-muted/50 px-6 py-4 font-mono text-xs text-muted-foreground md:px-10">
         <span>autore</span>
         <code className="truncate rounded bg-background px-2 py-0.5 text-foreground">
           {data.author}
+        </code>
+        <code className="truncate rounded bg-background px-2 py-0.5 text-foreground">
+          {formatDate(data.created_at)}
         </code>
       </footer>
     </article>

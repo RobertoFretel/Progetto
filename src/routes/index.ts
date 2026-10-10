@@ -1,13 +1,19 @@
-import type { RouteObject } from "react-router"
+import { redirect, type RouteObject } from "react-router"
 import "@/index.css";
 
 import Layout, { loaderApp } from "./dashboard/Layout"
 import Login, { actionLogin } from "./Login"
 import Register, { actionSignup } from "./Register"
 import Home, { loaderHome } from "./dashboard/Home";
-import Note, { loaderNote } from "./dashboard/Note";
+import Note, { actionNote, loaderNote } from "./dashboard/Note";
 
 export const routes: RouteObject[] = [
+  {
+    path: "/",
+    loader: () => {
+      return redirect("/dashboard")
+    }
+  },
   {
     path: '/dashboard',
     Component: Layout,
@@ -19,7 +25,8 @@ export const routes: RouteObject[] = [
       {
         path: ':notaId',
         Component: Note,
-        loader: loaderNote
+        loader: loaderNote,
+        action: actionNote
       }
     ]
   },

@@ -9,13 +9,16 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { routes } from "./routes";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 const elem = document.getElementById("root")!;
 const router = createBrowserRouter(routes)
 
 const app = (
   <StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider defaultTheme="system">
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </StrictMode>
 );
 
