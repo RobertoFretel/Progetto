@@ -23,25 +23,33 @@ export const loaderApp = async () => {
 
 export function App() {
   const { data } = useLoaderData() as Awaited<ReturnType<typeof loaderApp>>
-  const [user, setUser] = useState<User>()
+  const [user, setUser] = useState<User | null>(null) // parti da null o gestisci il caricamento
+  const [loadingUser, setLoadingUser] = useState<boolean>(true)
   const { toggleTheme, theme } = useTheme()
 
   useEffect(() => {
-
     authClient.getSession().then(sessione => {
       if (sessione.data && sessione.data.user) {
         setUser(sessione.data.user)
       }
+      setLoadingUser(false) // Abbiamo finito di verificare la sessione
     })
   }, [])
 
-  if (data == null || user == undefined) return
+  // MOSTRA UN CARICAMENTO FINCHÉ L'UTENTE O I DATI NON SONO PRONTI
+  if (loadingUser || data == null || user == null) {
+    return (
+      <div className="flex h-svh w-full items-center justify-center bg-background text-foreground">
+        <p className="font-mono text-sm">Caricamento dashboard...</p>
+      </div>
+    )
+  }
 
   return (
     <SidebarProvider>
       <AppSidebar user={user} notes={data} />
-      <main className="min-h-svh flex-1 bg-background">
-        <header className="flex h-16 items-center gap-3 border-b px-4 sm:px-8">
+      <main className="h-svh flex flex-1 flex-col bg-background overflow-hidden">
+        <header className="flex h-16 shrink-0 items-center gap-3 border-b px-4 sm:px-8 bg-background z-10">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-5" />
           <div className="flex min-w-0 flex-1 items-center gap-2 text-sm text-muted-foreground">
@@ -51,17 +59,18 @@ export function App() {
             </Link>
           </div>
           <Button variant={"ghost"} size={"icon"} onClick={toggleTheme}>
-            {theme == "dark" ? <Moon></Moon> : <Sun></Sun>}
+            {theme == "dark" ? <Moon /> : <Sun />}
           </Button>
           <Button size="sm" className="gap-2">
             <Plus aria-hidden="true" />
             <span className="hidden sm:inline">Nuova nota</span>
           </Button>
         </header>
-
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 lg:py-12">
-          <div className="flex flex-col gap-8">
-            <Outlet key={location.pathname} />
+        <div className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 lg:py-12">
+            <div className="flex flex-col gap-8">
+              <Outlet key={location.pathname} />
+            </div>
           </div>
         </div>
       </main>
