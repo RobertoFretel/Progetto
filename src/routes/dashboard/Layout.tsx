@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Moon, Plus, Sun } from "lucide-react";
 import type { User } from "better-auth";
 import { useTheme } from "@/components/ThemeProvider";
+import { CreaNota } from "@/components/CreateNote";
 
 export const loaderApp = async () => {
   const res = await apiClient.api.note.get()
@@ -61,10 +62,7 @@ export function App() {
           <Button variant={"ghost"} size={"icon"} onClick={toggleTheme}>
             {theme == "dark" ? <Moon /> : <Sun />}
           </Button>
-          <Button size="sm" className="gap-2">
-            <Plus aria-hidden="true" />
-            <span className="hidden sm:inline">Nuova nota</span>
-          </Button>
+          <CreaNota />
         </header>
         <div className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 lg:py-12">

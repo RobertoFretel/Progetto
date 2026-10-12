@@ -160,5 +160,53 @@ export const api = new Elysia({ prefix: "api" })
       description: "Restituisce tutta la tupla della nota modificata."
     }
   })
+  .put("/note", async ({ body, set, user }) => {
+    if (!user) {
+      set.status = 401
+      return { error: { message: "Unauthorized" } }
+    }
+    
+    const res = await db.unsafe(
+      `INSERT INTO note (titolo, contenuto, author) VALUES ($1, '', $2) RETURNING *`,
+      [body.titolo, user.id]
+    )
+
+    if (res.lengt == 0) {
+      set.status = 404
+      return { error: { message: "Not found" } }
+    }
+
+    return res[0]
+  }, {
+    body: t.Object({
+      titolo: t.String()
+    }),
+    response: {
+      200: t.Object({
+        id: t.String(),
+        titolo: t.String(),
+        contenuto: t.String(),
+        author: t.String(),
+        created_at: t.Date(),
+        updated_at: t.Date(),
+        preferito: t.Boolean(),
+        archiviato: t.Boolean(),
+      }),
+      401: t.Object({
+        error: t.Object({
+          message: t.String()
+        })
+      }),
+      404: t.Object({
+        error: t.Object({
+          message: t.String()
+        })
+      })
+    },
+    detail: {
+      summary: "Crea una nota partendo dal titolo",
+      description: "Restituisce tutta la tupla della nota creata."
+    }
+  })
 
 export type Api = typeof api
