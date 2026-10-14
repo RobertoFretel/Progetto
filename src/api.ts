@@ -29,12 +29,21 @@ export const api = new Elysia({ prefix: "api" })
       user: session?.user
     }
   })
-  .get("/note", async ({ set, user }) => {
+  .get("/note", async ({ set, user, query }) => {
     if (!user) {
       set.status = 401
       return { error: { message: "Unauthorized" } }
     }
     
+    if (query.preferiti == true) {
+      const res = await db.unsafe(
+        `SELECT * FROM note_utente WHERE userid = $1 AND preferito = true ORDER BY updated_at DESC `,
+        [user.id]
+      )
+
+      return res
+    }
+
     const res = await db.unsafe(
       `SELECT * FROM note_utente WHERE userid = $1 ORDER BY updated_at DESC `,
       [user.id]
@@ -42,6 +51,9 @@ export const api = new Elysia({ prefix: "api" })
 
     return res
   }, {
+    query: t.Object({
+      preferiti: t.Boolean()
+    }),
     response: {
       200: t.Array(t.Object({
         userid: t.String(),
@@ -115,24 +127,43 @@ export const api = new Elysia({ prefix: "api" })
     }
     
     const updated_at = new Date()
-    const res = await db.unsafe(
-      `UPDATE note SET contenuto = $1, updated_at = $2 WHERE id = $3 AND author = $4 RETURNING *`,
-      [body.contenuto, updated_at.toISOString(), params.id, user.id]
-    )
+    if ("preferito" in body) {
+      const res = await db.unsafe(
+        `UPDATE note SET preferito = $1, updated_at = $2 WHERE id = $3 AND author = $4 RETURNING *`,
+        [body.preferito, updated_at.toISOString(), params.id, user.id]
+      )
 
-    if (res.lengt == 0) {
-      set.status = 404
-      return { error: { message: "Not found" } }
+      if (res.lengt == 0) {
+        set.status = 404
+        return { error: { message: "Not found" } }
+      }
+
+      return res[0]
+    } else {
+      const res = await db.unsafe(
+        `UPDATE note SET contenuto = $1, updated_at = $2 WHERE id = $3 AND author = $4 RETURNING *`,
+        [body.contenuto, updated_at.toISOString(), params.id, user.id]
+      )
+
+      if (res.lengt == 0) {
+        set.status = 404
+        return { error: { message: "Not found" } }
+      }
+
+      return res[0]
     }
-
-    return res[0]
   }, {
     params: t.Object({
       id: t.Number()
     }),
-    body: t.Object({
-      contenuto: t.String()
-    }),
+    body: t.Union([
+      t.Object({
+        contenuto: t.String(),
+      }),
+      t.Object({
+        preferito: t.Boolean()
+      })
+    ]),
     response: {
       200: t.Object({
         id: t.String(),

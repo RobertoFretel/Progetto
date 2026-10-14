@@ -21,8 +21,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { Link, redirect } from 'react-router'
+import { Link } from 'react-router'
 import type { User } from 'better-auth'
+import { useMemo } from 'react'
 
 
 export const formatDate = (value: Date) =>
@@ -34,8 +35,14 @@ export const formatDate = (value: Date) =>
     minute: '2-digit',
   }).format(value)
   
-export type Notes = { userid: string; nome: string; notaid: string; titolonota: string; updated_at: Date; }[]
+export type Notes = { userid: string; nome: string; notaid: string; titolonota: string; updated_at: Date; preferito: boolean; archiviato: boolean }[]
 export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
+  const preferiti = useMemo(() => {
+    if (notes) {
+      return notes.filter(d => d.preferito == true).length
+    }
+  }, [notes])
+
   return (
     <Sidebar variant="inset">
       <SidebarHeader className="px-3 py-4">
@@ -60,13 +67,8 @@ export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Preferite">
                   <Star aria-hidden="true" />
-                  <span>Preferite</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Archivio">
-                  <Archive aria-hidden="true" />
-                  <span>Archivio</span>
+                  <Link to={"/dashboard?preferiti"}>Preferite</Link>
+                  <Badge variant="secondary" className="ml-auto group-data-[collapsible=icon]:hidden">{preferiti}</Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

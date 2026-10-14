@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiClient, authClient } from "@/lib/client";
-import { Link, redirect, useLoaderData } from "react-router";
+import { Link, redirect, useLoaderData, type LoaderFunctionArgs } from "react-router";
 
 import { formatDate } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -12,8 +12,9 @@ import { ChevronRight, FileText, Tag, Hash, Heart } from "lucide-react";
 import type { User } from "better-auth";
 import { cn } from "@/lib/utils";
 
-export const loaderHome = async () => {
-  const res = await apiClient.api.note.get()
+export const loaderHome = async ({ request }: LoaderFunctionArgs) => {
+  const { searchParams } = new URL(request.url)
+  const res = await apiClient.api.note.get({ query: searchParams.has("preferiti") ? { preferiti: true } : { preferiti: false } })
   if (res.status != 200) {
     throw redirect("/login")
   }
@@ -23,6 +24,7 @@ export const loaderHome = async () => {
 
 export default function Home () {
   const { data } = useLoaderData() as Awaited<ReturnType<typeof loaderHome>>
+  const isPreferite = useMemo(() => (new URL(window.location.href)).searchParams.has("preferiti") ?? false, [data])
   const [user, setUser] = useState<User>()
   const [selectedNote, setSelectedNote] = useState("1")
   const currentNote = useMemo(() => {
@@ -46,7 +48,7 @@ export default function Home () {
     <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between border-b">
-          <div><CardTitle>Note recenti</CardTitle><p className="mt-1 text-sm text-muted-foreground">Tutti i tuoi appunti in un unico posto.</p></div>
+          <div><CardTitle>Note {isPreferite ? "preferite" : "recenti"}</CardTitle><p className="mt-1 text-sm text-muted-foreground">Tutti i tuoi appunti in un unico posto.</p></div>
           <Badge variant="outline">{data.length} risultati</Badge>
         </CardHeader>
         <CardContent className="p-0">
@@ -66,7 +68,7 @@ export default function Home () {
               </div>
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-medium">{formatDate(note.updated_at)}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{note.userid}</p>
+                <p className="mt-1 text-xs text-muted-foreground">#{note.notaid}</p>
               </div>
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
             </button>

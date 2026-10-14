@@ -14,7 +14,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { CreaNota } from "@/components/CreateNote";
 
 export const loaderApp = async () => {
-  const res = await apiClient.api.note.get()
+  const res = await apiClient.api.note.get({ query: { preferiti: false } })
   if (res.status != 200) {
     throw redirect("/login")
   }

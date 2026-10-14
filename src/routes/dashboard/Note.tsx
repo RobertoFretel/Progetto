@@ -1,9 +1,11 @@
-import { Form, redirect, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router"
+import { Form, redirect, useLoaderData, useSubmit, type ActionFunctionArgs, type LoaderFunctionArgs } from "react-router"
 import { apiClient } from "@/lib/client"
 import { MarkdownContent } from '@/components/markdown-content'
 import { Archive, Star } from 'lucide-react'
 import { useEffect, useId, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 export async function loaderNote({ params }: LoaderFunctionArgs ) {
   const id = params["notaId"] as string
@@ -19,17 +21,23 @@ export async function loaderNote({ params }: LoaderFunctionArgs ) {
 export async function actionNote({ params, request }: ActionFunctionArgs) {
   const id = params["notaId"] as string
   const formData = await request.formData()
-  const contenuto = formData.get("contenuto") as string || ""
+  const intent = formData.get("intent")
 
-  if (contenuto != "") {
-    const res = await apiClient.api.nota({ id }).patch({ contenuto })
-    if (res.status == 200) {
-      return true
-    } else {
-      return false
+  if (intent === "salva_contenuto") {
+    const contenuto = formData.get("contenuto") as string || ""
+    if (contenuto !== "") {
+      const res = await apiClient.api.nota({ id }).patch({ contenuto })
+      return res.status === 200
     }
-  }
+  } 
   
+  if (intent === "toggle_preferito") {
+    const preferito = Boolean(formData.get("preferito")) || false
+    const res = await apiClient.api.nota({ id }).patch({ preferito })
+    return res.status === 200
+  }
+
+  return false
 }
 
 const dateFormatter = new Intl.DateTimeFormat('it-IT', {
@@ -45,8 +53,9 @@ function formatDate(iso: Date) {
 export default function Note() {
   const { data } = useLoaderData() as Awaited<ReturnType<typeof loaderNote>>
   const [editing, setEditing] = useState<boolean>(false)
-  const [contenuto, setContent] = useState(data ? data.contenuto : "")
   const textAreaId = useId()
+  
+  const submit = useSubmit()
 
   useEffect(() => {
     setEditing(false)
@@ -69,15 +78,25 @@ export default function Note() {
                 {data.titolo}
               </span>
             </h1>
-            {data.preferito && (
-              <span
-                className="mt-1 flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground"
+            {editing == false && <>
+              <Input
+                type="checkbox"
+                id="preferito"
+                name="preferito"
+                defaultChecked={data.preferito}
+                className="hidden"
+                onChange={(e) => {
+                  submit(e.currentTarget.form)
+                }}
+              />
+              <label htmlFor="preferito"
+                className="mt-1 flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground cursor-pointer"
                 title="Preferito"
               >
-                <Star className="size-4 fill-current" aria-hidden="true" />
+                <Star className={cn("size-4", data.preferito && 'fill-current')} aria-hidden="true" />
                 <span className="sr-only">Preferito</span>
-              </span>
-            )}
+              </label>
+            </>}
           </div>
 
           {data.archiviato && (
@@ -98,7 +117,6 @@ export default function Note() {
                 name="contenuto"
                 id={textAreaId}
                 defaultValue={data.contenuto}
-                onChange={(event) => setContent(event.target.value)}
                 autoFocus
                 spellCheck={false}
                 className="field-sizing-content min-h-64 w-full resize-y rounded-lg border bg-muted/40 p-4 font-mono text-sm leading-relaxed text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
@@ -117,9 +135,10 @@ export default function Note() {
             </code>
           </div>
           {editing && (
-            <Button size={"sm"} type="submit">SALVA</Button>
+            <Button size={"sm"} type="submit" className="fixed bottom-4 right-4">SALVA</Button>
           )}
         </footer>
+        <Input type="hidden" name="intent" value={editing ? "salva_contenuto" : "toggle_preferito"} />
       </Form>
     </article>
   )
