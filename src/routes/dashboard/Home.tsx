@@ -61,7 +61,7 @@ export default function Home () {
                   {note.preferito && <Badge variant="secondary"><Heart /></Badge>}
                 </div>
                 <p className="mt-1 truncate text-sm text-muted-foreground">
-                  Nota #{note.notaid} · {note.nome}
+                  Nota di {note.nome}
                 </p>
               </div>
               <div className="hidden text-right sm:block">
@@ -86,7 +86,7 @@ export default function Home () {
           <CardContent className="flex flex-col gap-5">
             <div className="rounded-lg border bg-background p-4">
               <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <Hash aria-hidden="true" /> Identificativo
+                <Hash aria-hidden="true" size={"16px"} /> Identificativo
               </div>
               <p className="font-mono text-sm">{currentNote.notaid}</p>
             </div>

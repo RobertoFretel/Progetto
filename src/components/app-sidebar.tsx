@@ -37,7 +37,7 @@ export const formatDate = (value: Date) =>
 export type Notes = { userid: string; nome: string; notaid: string; titolonota: string; updated_at: Date; }[]
 export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar variant="inset">
       <SidebarHeader className="px-3 py-4">
         <div className="flex items-center gap-3 px-2">
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
@@ -51,9 +51,9 @@ export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => redirect("/dashboard")} isActive tooltip="Tutte le note">
+                <SidebarMenuButton tooltip="Tutte le note">
                   <Inbox aria-hidden="true" />
-                  <span>Tutte le note</span>
+                  <Link to={'/dashboard'}>Tutte le note</Link>
                   <Badge variant="secondary" className="ml-auto group-data-[collapsible=icon]:hidden">{notes.length}</Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>

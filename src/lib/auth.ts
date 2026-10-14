@@ -4,13 +4,16 @@ import { openAPI } from "better-auth/plugins"
 
 export const auth = betterAuth({
   database: new Pool({
-    user: "postgres_user",
-    password: "postgres_password",
-    database: "postgres_db",
-    host: "192.168.0.104"
+    user: import.meta.env.POSTGRES_USER,
+    password: import.meta.env.POSTGRES_PASSWORD,
+    database: import.meta.env.POSTGRES_DATABASE,
+    host: import.meta.env.POSTGRES_HOST
   }),
   emailAndPassword: {
     enabled: true
   },
-  plugins: [openAPI()]
+  plugins: [openAPI()],
+  baseURL: {
+    allowedHosts: ['localhost:*']
+  }
 })

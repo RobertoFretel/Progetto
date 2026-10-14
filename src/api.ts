@@ -4,10 +4,10 @@ import { auth } from "./lib/auth";
 
 const db = new Bun.SQL({
   adapter: "postgres",
-  host: "192.168.0.104",
-  username: "postgres_user",
-  password: "postgres_password",
-  database: "postgres_db"
+  host: import.meta.env.POSTGRES_HOST,
+  username: import.meta.env.POSTGRES_USER,
+  password: import.meta.env.POSTGRES_PASSWORD,
+  database: import.meta.env.POSTGRES_DATABASE
 })
 
 export const api = new Elysia({ prefix: "api" })
