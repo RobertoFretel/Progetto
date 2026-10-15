@@ -2,10 +2,17 @@ import { Form, redirect, useLoaderData, useSubmit, type ActionFunctionArgs, type
 import { apiClient } from "@/lib/client"
 import { MarkdownContent } from '@/components/markdown-content'
 import { Archive, Star } from 'lucide-react'
-import { useEffect, useId, useMemo, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { ChevronsUpDown } from "lucide-react"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export async function loaderNote({ params }: LoaderFunctionArgs ) {
   const id = params["notaId"] as string
@@ -62,7 +69,7 @@ export default function Note() {
   }, [data])
 
   if (data == null) return
-  return (
+  return <>
     <article className="overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm">
       <Form method="post">
         <header className="flex flex-col gap-4 border-b px-6 pb-6 pt-8 md:px-10">
@@ -126,13 +133,13 @@ export default function Note() {
 
         <footer className="flex flex-wrap justify-between items-center gap-2 border-t bg-muted/50 px-6 py-4 font-mono text-xs text-muted-foreground md:px-10">
           <div className="flex flex-wrap items-center gap-2">
-            <span>autore</span>
-            <code className="truncate rounded bg-background px-2 py-0.5 text-foreground">
+            <span>Autore</span>
+            <code className="px-2 py-0.5 text-foreground">
               {data.author}
             </code>
-            <code className="truncate rounded bg-background px-2 py-0.5 text-foreground">
+            <span className="px-2 py-0.5 text-foreground">
               {formatDate(data.created_at)}
-            </code>
+            </span>
           </div>
           {editing && (
             <Button size={"sm"} type="submit" className="fixed bottom-4 right-4">SALVA</Button>
@@ -141,5 +148,23 @@ export default function Note() {
         <Input type="hidden" name="intent" value={editing ? "salva_contenuto" : "toggle_preferito"} />
       </Form>
     </article>
-  )
+    <Card>
+      <Collapsible>
+        <CardHeader className="flex items-center justify-between">
+          <CardTitle>Allegati</CardTitle>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-8">
+              <ChevronsUpDown />
+              <span className="sr-only">Toggle details</span>
+            </Button>
+          </CollapsibleTrigger>
+        </CardHeader>
+        <CardContent>
+          <CollapsibleContent>
+            Non ho voglia di fare il get degli allegati oggi
+          </CollapsibleContent>
+        </CardContent>
+      </Collapsible>
+    </Card>
+  </>
 }

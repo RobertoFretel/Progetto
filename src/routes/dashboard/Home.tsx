@@ -99,8 +99,8 @@ export default function Home () {
               </div>
               <Separator />
               <div className="flex items-center justify-between gap-3">
-                <span className="text-muted-foreground">User ID</span>
-                <span className="max-w-44 truncate font-mono text-xs" title={currentNote.userid}>{currentNote.userid}</span>
+                <span className="text-muted-foreground">Allegati</span>
+                <span className="max-w-44 truncate font-mono text-xs" title={currentNote.numeroallegati}>{currentNote.numeroallegati}</span>
               </div>
               <Separator />
               <div className="flex items-center justify-between gap-3">
