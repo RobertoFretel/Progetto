@@ -14,6 +14,10 @@ export const auth = betterAuth({
   },
   plugins: [openAPI()],
   baseURL: {
-    allowedHosts: ['localhost:*']
-  }
+    allowedHosts: ['localhost:*', '192.168.0.156:*']
+  },
+  trustedOrigins: [
+    "http://localhost:5173",          // se usi Vite in locale
+    "http://192.168.0.156:5173",      // il tuo IP locale per testare da telefono
+  ],
 })

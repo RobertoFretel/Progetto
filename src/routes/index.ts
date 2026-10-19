@@ -7,6 +7,7 @@ import Register, { actionSignup } from "./Register"
 import Home, { loaderHome } from "./dashboard/Home";
 import Note, { actionNote, loaderNote } from "./dashboard/Note";
 import { actionInsertNota } from "@/components/CreateNote";
+import Allegati, { actionAllegati, loaderAllegati } from "./dashboard/Allegati";
 
 export const routes: RouteObject[] = [
   {
@@ -29,6 +30,12 @@ export const routes: RouteObject[] = [
         Component: Note,
         loader: loaderNote,
         action: actionNote
+      },
+      {
+        path: 'allegati',
+        Component: Allegati,
+        loader: loaderAllegati,
+        action: actionAllegati
       }
     ]
   },

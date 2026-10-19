@@ -1,6 +1,7 @@
 import {
   Archive,
   FileText,
+  Folder,
   Inbox,
   MoreHorizontal,
   Settings2,
@@ -35,7 +36,7 @@ export const formatDate = (value: Date) =>
     minute: '2-digit',
   }).format(value)
   
-export type Notes = { userid: string; nome: string; notaid: string; titolonota: string; updated_at: Date; preferito: boolean; archiviato: boolean }[]
+export type Notes = { userid: string; nome: string; notaid: string; titolonota: string; updated_at: Date; preferito: boolean; archiviato: boolean; numeroallegati: string }[]
 export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
   const preferiti = useMemo(() => {
     if (notes) {
@@ -43,8 +44,16 @@ export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
     }
   }, [notes])
 
+  const allegati = useMemo(() => {
+    if (notes) {
+      let n = 0
+      notes.forEach(a => n += Number(a.numeroallegati))
+      return n
+    }
+  }, [notes])
+
   return (
-    <Sidebar variant="inset">
+    <Sidebar>
       <SidebarHeader className="px-3 py-4">
         <div className="flex items-center gap-3 px-2">
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
@@ -69,6 +78,13 @@ export function AppSidebar({ notes, user }: { notes: Notes, user: User }) {
                   <Star aria-hidden="true" />
                   <Link to={"/dashboard?preferiti"}>Preferite</Link>
                   <Badge variant="secondary" className="ml-auto group-data-[collapsible=icon]:hidden">{preferiti}</Badge>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Allegati">
+                  <Folder aria-hidden="true" />
+                  <Link to={"/dashboard/allegati"}>Allegati</Link>
+                  <Badge variant="secondary" className="ml-auto group-data-[collapsible=icon]:hidden">{allegati}</Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

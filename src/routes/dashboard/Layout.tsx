@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { apiClient, authClient } from "@/lib/client";
 import { redirect, useLoaderData, Outlet, Link } from "react-router";
 
+import { apiClient, authClient } from "@/lib/client";
+import { useTheme } from "@/components/ThemeProvider";
+
+import { CreaNota } from "@/components/CreateNote";
 import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 
-import { BookOpen, Moon, Plus, Sun } from "lucide-react";
+import { BookOpen, Moon, Sun } from "lucide-react";
 import type { User } from "better-auth";
-import { useTheme } from "@/components/ThemeProvider";
-import { CreaNota } from "@/components/CreateNote";
 
 export const loaderApp = async () => {
   const res = await apiClient.api.note.get({ query: { preferiti: false } })
@@ -33,7 +34,7 @@ export function App() {
       if (sessione.data && sessione.data.user) {
         setUser(sessione.data.user)
       }
-      setLoadingUser(false) // Abbiamo finito di verificare la sessione
+      setLoadingUser(false)
     })
   }, [])
 
@@ -47,7 +48,7 @@ export function App() {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar user={user} notes={data} />
       <main className="h-svh flex flex-1 flex-col bg-background overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-3 border-b px-4 sm:px-8 bg-background z-10">
@@ -65,7 +66,7 @@ export function App() {
           <CreaNota />
         </header>
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 lg:py-12">
+          <div className="mx-auto px-4 py-8 sm:px-8 lg:py-12">
             <div className="flex flex-col gap-8">
               <Outlet key={location.pathname} />
             </div>

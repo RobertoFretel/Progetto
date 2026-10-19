@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia"
 import { openapi } from '@elysia/openapi'
+import { cors } from "@elysia/cors"
 import { auth } from "./lib/auth";
 import path from "node:path";
 
@@ -12,7 +13,6 @@ const db = new Bun.SQL({
 })
 
 export const api = new Elysia({ prefix: "api" })
-  .mount(auth.handler)
   .use(
     openapi({
       documentation: {
@@ -23,12 +23,20 @@ export const api = new Elysia({ prefix: "api" })
       }
     })
   )
+  .use(cors({
+    origin: true, // Oppure specifica l'array dei tuoi indirizzi consentiti
+    credentials: true, // FONDAMENTALE per passare i cookie di sessione di Better Auth
+  }))
+  .mount(auth.handler)
   .derive(async ({ request }) => {
     const session = await auth.api.getSession({ headers: request.headers })
     return {
       session: session?.session,
       user: session?.user
     }
+  })
+  .onAfterResponse(({ responseValue, request }) => {
+    // Quando una nota viene aggiornata fai partire l'embedding
   })
   .get("/note", async ({ set, user, query }) => {
     if (!user) {
@@ -38,13 +46,7 @@ export const api = new Elysia({ prefix: "api" })
 
     if (query.preferiti == true) {
       const res = await db.unsafe(
-        `SELECT n.userid, n.nome, n.notaid, n.titolonota, n.updated_at, n.preferito, n.archiviato, COALESCE(a.numeroAllegati, 0) AS numeroAllegati
-FROM note_utente n LEFT JOIN (
-    SELECT nota, COUNT(nota) AS numeroAllegati 
-    FROM allegati
-    GROUP BY nota
-) a ON a.nota = n.notaid
-WHERE n.userid = $1 AND n.preferito = true ORDER BY n.updated_at DESC`,
+        `SELECT * FROM note_utente n WHERE n.userid = $1 AND n.preferito = true ORDER BY n.updated_at DESC`,
         [user.id]
       )
 
@@ -52,13 +54,7 @@ WHERE n.userid = $1 AND n.preferito = true ORDER BY n.updated_at DESC`,
     }
 
     const res = await db.unsafe(
-      `SELECT n.userid, n.nome, n.notaid, n.titolonota, n.updated_at, n.preferito, n.archiviato, COALESCE(a.numeroAllegati, 0) AS numeroAllegati
-FROM note_utente n LEFT JOIN (
-    SELECT nota, COUNT(nota) AS numeroAllegati 
-    FROM allegati
-    GROUP BY nota
-) a ON a.nota = n.notaid
-WHERE n.userid = $1 ORDER BY n.updated_at DESC`,
+      `SELECT * FROM note_utente n WHERE n.userid = $1 ORDER BY n.updated_at DESC`,
       [user.id]
     )
 
@@ -87,6 +83,38 @@ WHERE n.userid = $1 ORDER BY n.updated_at DESC`,
     detail: {
       summary: "Ottieni le note dell'utente",
       description: "Restituisce tutte le tuple della relazione note collegate all'utente autenticato."
+    }
+  })
+  .get('/allegati', async ({ params, set, user }) => {
+     if (!user) {
+      set.status = 401
+      return { error: { message: "Unauthorized" } }
+    }
+
+    const res = await db.unsafe(
+      `SELECT * FROM allegati n WHERE autore = $1`,
+      [user.id]
+    )
+
+    return res
+  }, {
+    response: {
+      200: t.Array(t.Object({
+        id: t.String(),
+        tipo: t.String(),
+        nota: t.String(),
+        autore: t.String(),
+        percorso: t.String(),
+      })),
+      401: t.Object({
+        error: t.Object({
+          message: t.String()
+        })
+      })
+    },
+    detail: {
+      summary: "Ottieni tutti gli allegati caricati dall'utente",
+      description: "Restituisce tutte le tuple della relazione allegati collegate all'utente autenticato."
     }
   })
   .get('/nota/:id', async ({ params, set, user }) => {

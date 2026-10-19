@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import type { User } from "better-auth";
 import { apiClient, authClient } from "@/lib/client";
 import { Link, redirect, useLoaderData, type LoaderFunctionArgs } from "react-router";
+import { useEffect, useMemo, useState } from "react";
 
-import { formatDate } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { formatDate } from "@/components/app-sidebar";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card"
 
 import { ChevronRight, FileText, Tag, Hash, Heart } from "lucide-react";
-import type { User } from "better-auth";
 import { cn } from "@/lib/utils";
 
 export const loaderHome = async ({ request }: LoaderFunctionArgs) => {
@@ -45,7 +45,7 @@ export default function Home () {
   if (data == null || user == undefined) return
   
   return (
-    <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between border-b">
           <div><CardTitle>Note {isPreferite ? "preferite" : "recenti"}</CardTitle><p className="mt-1 text-sm text-muted-foreground">Tutti i tuoi appunti in un unico posto.</p></div>
