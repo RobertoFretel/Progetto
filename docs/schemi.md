@@ -5,7 +5,8 @@ Ecco gli schemi delle relazioni e viste create per far funzionare il server web!
 
 ```sql
 -- Adminer 6.1.1 PostgreSQL 18.6 dump
-CREATE SEQUENCE IF NOT EXISTS snowflake_seq;
+
+DROP FUNCTION IF EXISTS "public"."genera_snowflake_id";;
 CREATE FUNCTION "public"."genera_snowflake_id" ()
 RETURNS int8 LANGUAGE plpgsql AS $$
 DECLARE
@@ -31,6 +32,16 @@ BEGIN
 END
 $$;
 
+CREATE TABLE "public"."allegati" (
+    "id" bigint DEFAULT genera_snowflake_id() NOT NULL,
+    "tipo" character varying(60) NOT NULL,
+    "nota" bigint NOT NULL,
+    "autore" text NOT NULL,
+    "percorso" text NOT NULL,
+    CONSTRAINT "allegati_pkey" PRIMARY KEY ("id")
+);
+
+
 CREATE TABLE "public"."note" (
     "id" bigint DEFAULT genera_snowflake_id() NOT NULL,
     "titolo" character varying(255) NOT NULL,
@@ -44,8 +55,11 @@ CREATE TABLE "public"."note" (
 );
 
 
-CREATE TABLE "public"."note_utente" ("userid" text, "nome" text, "notaid" bigint, "titolonota" character varying(255), "updated_at" timestamptz, "preferito" boolean, "archiviato" boolean);
+CREATE TABLE "public"."note_utente" ("userid" text, "nome" text, "notaid" bigint, "titolonota" character varying(255), "updated_at" timestamptz, "preferito" boolean, "archiviato" boolean, "numeroallegati" bigint);
 
+
+ALTER TABLE ONLY "public"."allegati" ADD CONSTRAINT "allegati_autore_fkey" FOREIGN KEY (autore) REFERENCES "public"."user"(id) ON DELETE CASCADE;
+ALTER TABLE ONLY "public"."allegati" ADD CONSTRAINT "allegati_nota_fkey" FOREIGN KEY (nota) REFERENCES "public"."note"(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY "public"."note" ADD CONSTRAINT "note_author_fkey" FOREIGN KEY (author) REFERENCES "public"."user"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -56,10 +70,15 @@ CREATE VIEW "public"."note_utente" AS SELECT "user".id AS userid,
     note.titolo AS titolonota,
     note.updated_at,
     note.preferito,
-    note.archiviato
+    note.archiviato,
+    COALESCE(a.numeroallegati, (0)::bigint) AS numeroallegati
    FROM "user",
-    note
+    (note
+     LEFT JOIN ( SELECT allegati.nota,
+            count(allegati.nota) AS numeroallegati
+           FROM allegati
+          GROUP BY allegati.nota) a ON ((a.nota = note.id)))
   WHERE (note.author = "user".id);
 
--- 2026-10-14 15:59:00 UTC
+-- 2026-10-21 08:44:51 UTC
 ```
